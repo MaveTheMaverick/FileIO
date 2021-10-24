@@ -1,6 +1,7 @@
 package org.maverick;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -16,22 +17,27 @@ public class FileIO {
     public static final String SEPARATOR = File.separator;
     private static final String[] illegalChars = "\\/:*?\"<>|".split("");
 
+    /**
+     *
+     * @param filePath
+     * @return
+     * @throws IOException
+     */
     public static String[] readFile(String filePath) throws IOException {
         Path path = Paths.get(filePath);
         //System.out.println(Arrays.toString(lines));
 
         return Files.readAllLines(path).toArray(new String[0]);
     }
-    public static String[] readFile(Path filePath) {
+
+    public static String[] readFile(Path filePath) throws IOException {
         String[] lines = new String[0];
-        try {
-            lines = Files.readAllLines(filePath).toArray(new String[0]);
-            //System.out.println(Arrays.toString(lines));
-        } catch (IOException e) {
-            // exception handling
-        }
+        lines = Files.readAllLines(filePath).toArray(new String[0]);
+        //System.out.println(Arrays.toString(lines));
+
         return lines;
     }
+
     public static boolean writeFile(String absolutePath, byte[] fileContent) {
         Path path = Paths.get(absolutePath);
         try {
@@ -41,6 +47,7 @@ public class FileIO {
         }
         return true;
     }
+
     public static boolean writeFile(String absolutePath, String fileContent) {
         Path path = Paths.get(absolutePath);
         try {
@@ -50,11 +57,13 @@ public class FileIO {
         }
         return true;
     }
+
     public static boolean jsonWrite(String absolutePath, String[] write) {
         Gson gson = new Gson();
         System.out.println(gson.toJson(write));
         return writeFile(absolutePath, gson.toJson(write).getBytes());
     }
+
     public static String[] jsonRead(String absolutePath) {
 
         Path path = Paths.get(absolutePath);
@@ -67,6 +76,19 @@ public class FileIO {
         }
         return gson.fromJson(lines[0], String[].class);
     }
+
+    public void save(String path, String fileName, Object object) {
+        if (!fileName.endsWith(".json"))
+            fileName += ".json";
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String saveContent = gson.toJson(object);
+        FileIO.writeFile(path + File.separator + fileName, saveContent);
+    }
+
+
+
+
+
 
     /**
      * Returns a String[] of all the items in a directory
@@ -94,6 +116,7 @@ public class FileIO {
 
         return filesInDir;
     }
+
     public static boolean fileExists(String absolutePath) {
         File file = new File(absolutePath);
         return file.exists();
@@ -144,20 +167,26 @@ public class FileIO {
         return folderPath;
 
     }
+
+    /**
+     * Deletes everything in a directory
+     * @param directory
+     * @return {@code true} if directory was successfully emptied and no exceptions were thrown
+     */
     public static boolean cleanDirectory(String directory) {
         File directoryFile = new File(directory);
         try {
             FileUtils.cleanDirectory(directoryFile);
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
             return false;
-        } catch (IllegalArgumentException ignored) {}
+        }
         return true;
     }
 
     /**
      * Scans files in a directory to create a unique id
-     * @param absolutePath path of the directory
+     * @param absolutePath path of the directory to be scanned
      * @return int unique id
      */
     public static int uniqueId(String absolutePath) {
@@ -175,6 +204,11 @@ public class FileIO {
         return i;
     }
 
+    /**
+     * Checks if a {@code String} contains common characters that can't be used in filenames - Warning: this is not an exhaustive check
+     * @param string
+     * @return {@code true} if illegal characters were found
+     */
     public static boolean containsIllegalChars(String string) {
         boolean illegal = false;
         for (String illegalChar : illegalChars) {
