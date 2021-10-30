@@ -1,4 +1,4 @@
-package org.maverick;
+package com.github.mavethemaverick;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -77,18 +77,39 @@ public class FileIO {
         return gson.fromJson(lines[0], String[].class);
     }
 
-    public void save(String path, String fileName, Object object) {
+    /**
+     * Universal function to save an instance of a class
+     * @param path
+     * @param fileName
+     * @param object
+     */
+    public static boolean save(String path, String fileName, Object object) {
         if (!fileName.endsWith(".json"))
             fileName += ".json";
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String saveContent = gson.toJson(object);
-        FileIO.writeFile(path + File.separator + fileName, saveContent);
+        return writeFile(path + File.separator + fileName, saveContent);
     }
 
+    /** Universal function to load an instance of a class that was saved to a file
+     * @param path
+     * @param fileName
+     * @param classOfT
+     * @param <T>
+     * @return
+     * @throws IOException
+     */
+    public static <T> T load(String path, String fileName, Class<T> classOfT) throws IOException {
+        if (!fileName.endsWith(".json"))
+            fileName += ".json";
+        String[] lines = readFile(path + File.separator + fileName);
+        StringBuilder fileContent = new StringBuilder();
+        for (String line : lines)
+            fileContent.append(line);
 
-
-
-
+        Gson gson = new Gson();
+        return gson.fromJson(fileContent.toString(), classOfT);
+    }
 
     /**
      * Returns a String[] of all the items in a directory
