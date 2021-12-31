@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
+//TODO consider making into a template class?
 public class FileIO {
     public static final String SEPARATOR = File.separator;
     private static final String[] illegalChars = "\\/:*?\"<>|".split("");
